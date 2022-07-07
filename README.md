@@ -3,21 +3,20 @@ Present clean and professional documentation with Swagger + shelf;
 
 ## Example
 
-Get a YAML or JSON schema file. Ex: (swagger.yaml)
+Get a YAML or JSON schema file. Ex: (specs/swagger.yaml)
 ```yaml
-swagger: "2.0"
+openapi: 3.0.0
 info:
-  description: "This is a sample server Petstore server.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For this sample, you can use the api key `special-key` to test the authorization     filters."
-  version: "1.0.0"
-  title: "Swagger Ship YAML"
-  termsOfService: "http://swagger.io/terms/"
-  contact:
-    email: "apiteam@swagger.io"
-  license:
-    name: "Apache 2.0"
-    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-host: "petstore.swagger.io"
-basePath: "/v2"
+  description: "API system"
+  version: "1.0.10"
+  title: "Swagger Test"
+servers:
+  - url: http://my-service.info
+    description: Remote server
+tags:
+- name: "user"
+  description: "Access to User"
+
 ```
 
 Configure the handler with Shelf:
@@ -28,7 +27,7 @@ import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_swagger_ui/shelf_swagger_ui.dart';
 
 void main(List<String> args) async {
-  final path = 'swagger.yaml';
+  final path = 'specs/swagger.yaml';
   final handler = SwaggerUI(path, title: 'Swagger Test');
   var server = await io.serve(handler, '0.0.0.0', 4001);
   print('Serving at http://${server.address.host}:${server.port}');

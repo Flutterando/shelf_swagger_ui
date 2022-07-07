@@ -1,0 +1,210 @@
+openapi: 3.0.0
+info:
+  description: "API system"
+  version: "1.0.10"
+  title: "Swagger Test"
+servers:
+  - url: http://my-service.info
+    description: Remote server
+tags:
+- name: "user"
+  description: "Access to User"
+- name: "project"
+  description: "Access to project"
+
+paths:
+  /user/{id}:
+    get:
+      tags:
+      - "user"
+      security:
+        - bearerAuth: [] 
+      summary: "get user by id"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: The user ID
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserEntity"
+        "403":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+  /user:
+    get:
+      tags:
+      - "user"
+      security:
+        - bearerAuth: [] 
+      summary: "get all user"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserEntity"
+        "403":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags:
+      - "user"
+      security:
+        - bearerAuth: [] 
+      summary: "Create a use"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserEntity"
+              
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserEntity"
+        "403":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags:
+      - "user"
+      security:
+        - bearerAuth: [] 
+      summary: "Update a use"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserEntity"
+              
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserEntity"
+        "403":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+  /project:
+    $ref: "./project/project.yaml"
+    
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Auth header (Authorization) Access Token"
+    bearerAuthRefreshToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "(Authorization) Refresh Token"
+    basicAuth:   
+      type: http
+      scheme: basic
+  responses:
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEntity'
+    InternalError:
+      description: Internal error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEntity'
+    Unauthorized:
+      description: Forbidden operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEntity'
+  schemas:
+    ErrorEntity:
+      type: "object"
+      properties:
+        error:
+          type: string
+    FileReturn:
+      type: "object"
+      properties:
+        image:
+          type: string
+    Tokenization:
+      type: "object"
+      properties:
+        expiresIn:
+          type: integer
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    UserEntity:
+      type: "object"
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        imageUrl:
+          type: string
+        active:
+          type: boolean
+        role:
+          type: string
+          default: "user"
+          enum:
+            - "dev"
+            - "manager"
+            - "admin"
+    ProjectEntity:
+      type: "object"
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+        active:
+          type: boolean
+
+
