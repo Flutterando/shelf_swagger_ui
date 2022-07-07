@@ -52,7 +52,6 @@ class SwaggerUI {
       final file = File(filePath);
       return Response.ok(file.readAsBytesSync());
     }
-    final mainSpecPath = '$path/$mainSpec'.replaceAll('//', '/');
     return Response.ok(headers: {
       HttpHeaders.contentTypeHeader: ContentType('text', 'html', charset: 'utf-8').toString(),
     }, '''
@@ -77,7 +76,7 @@ class SwaggerUI {
     window.ui = SwaggerUIBundle({
       dom_id: '#swagger-ui',
       deepLinking: $deepLink,
-      url: "$mainSpecPath"
+      url: "$mainSpec"
     });
   };
 </script>
