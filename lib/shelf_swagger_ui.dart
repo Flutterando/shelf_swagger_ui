@@ -52,7 +52,7 @@ class SwaggerUI {
       final file = File(filePath);
       return Response.ok(file.readAsBytesSync());
     }
-    final mainSpecPath = '$path/$mainSpec';
+    final mainSpecPath = '$path/$mainSpec'.replaceAll('//', '/');
     return Response.ok(headers: {
       HttpHeaders.contentTypeHeader: ContentType('text', 'html', charset: 'utf-8').toString(),
     }, '''
