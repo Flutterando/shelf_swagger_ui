@@ -1,5 +1,5 @@
 # Shelf SwaggerUI
-Present clean and professional documentation with Swagger + shelf;
+Present, clean and professional documentation with Swagger + shelf;
 
 ## Example
 

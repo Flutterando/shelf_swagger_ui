@@ -1,6 +1,6 @@
 name: shelf_swagger_ui
 description: Present clean and professional documentation with Swagger + shelf.
-version: 0.1.2
+version: 1.0.0
 repository: https://github.com/Flutterando/shelf_swagger_ui
 
 environment:

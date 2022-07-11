@@ -1,3 +1,4 @@
+/// Present, clean and professional documentation with Swagger + shelf;
 library shelf_swagger_ui;
 
 import 'dart:async';
@@ -6,14 +7,53 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:shelf/shelf.dart';
 
+/// Controls the default expansion setting for the operations and tags.
+enum DocExpansion {
+  /// expands only the tags
+  list,
+
+  /// expands the tags and operations
+  full,
+
+  /// expands nothing
+  none,
+}
+
+/// Highlight.js syntax coloring theme to use. (Only these 6 styles are available).
+enum SyntaxHighlightTheme {
+  agate('agate'),
+  arta('arta'),
+  monokai('monokai'),
+  nord('nord'),
+  obsidian('obsidian'),
+  tomorrowNight('tomorrow-night');
+
+  final String theme;
+  const SyntaxHighlightTheme(this.theme);
+}
+
 ///This class starts all the default attributes to start swagger-ui.
 ///In addition to receiving the Spec (YAML/JSON)
 ///it is also possible to configure the title and enable "deepLink".
+/// <br /><br />
+///[fileSchemaPath]: Schema path (YAML/JSON). <br />
+///[title]: Defines the title that is visible in the browser tab. <br />
+///[docExpansion]: (Default DocExpansion.list), Controls the default expansion setting for the operations and tags. It can be 'list' (expands only the tags), 'full' (expands the tags and operations) or 'none' (expands nothing). <br />
+///[deepLink]: (Default true) enables the use of deep-links to reference each node in the url (ex: /swagger/#/post). <br />
+///[syntaxHighlightTheme]: (Default SyntaxHighlightTheme.agate) Highlight.js syntax coloring theme to use. (Only these 6 styles are available). <br />
+///[persistAuthorization]: (Default false) If set to true, it persists authorization data and it would not be lost on browser close/refresh. <br />
+/// <br /><br />
+/// Example:
+///```dart
+///final swaggerHandler = SwaggerUI(
+///  'swagger/swagger.yaml',
+///  title: 'Ship API',
+///  deepLink: true,
+///);
 ///
-///[fileSchemaPath]: Schema path (YAML/JSON).
-///[schemaLang]: (Default SchemaLang.yaml), specifies which markup language will be used as the schema.
-///[title]: Defines the title that is visible in the browser tab.
-///[deepLink]: (Default true) enables the use of deep-links to reference each node in the url (ex: /swagger/#/post).
+///var server = await io.serve(swaggerHandler, '0.0.0.0', 4000);
+///```
+
 class SwaggerUI {
   ///Schema path (YAML/JSON).
   final String fileSchemaPath;
@@ -21,13 +61,25 @@ class SwaggerUI {
   ///Defines the title that is visible in the browser tab.
   final String title;
 
+  /// Controls the default expansion setting for the operations and tags.
+  final DocExpansion docExpansion;
+
   ///(Default false) enables the use of deep-links to reference each node in the url (ex: /swagger/#/post).
   final bool deepLink;
+
+  /// Highlight.js syntax coloring theme to use. (Only these 6 styles are available).
+  final SyntaxHighlightTheme syntaxHighlightTheme;
+
+  /// If set to true, it persists authorization data and it would not be lost on browser close/refresh
+  final bool persistAuthorization;
 
   SwaggerUI(
     this.fileSchemaPath, {
     this.title = 'Shelf Swagger',
+    this.docExpansion = DocExpansion.list,
+    this.syntaxHighlightTheme = SyntaxHighlightTheme.agate,
     this.deepLink = false,
+    this.persistAuthorization = false,
   });
 
   ///Shelf Handler
@@ -75,8 +127,14 @@ class SwaggerUI {
   window.onload = () => {
     window.ui = SwaggerUIBundle({
       dom_id: '#swagger-ui',
+      docExpansion: '${docExpansion.name}',
       deepLinking: $deepLink,
-      url: "$mainSpec"
+      url: "$mainSpec",
+      syntaxHighlight: {
+        activate: true,
+        theme: '${syntaxHighlightTheme.theme}',
+      },
+      persistAuthorization: $persistAuthorization,
     });
   };
 </script>
