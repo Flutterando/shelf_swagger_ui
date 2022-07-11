@@ -1,14 +1,14 @@
 name: shelf_swagger_ui
 description: Present clean and professional documentation with Swagger + shelf.
-version: 1.0.0
+version: 1.0.0+1
 repository: https://github.com/Flutterando/shelf_swagger_ui
 
 environment:
   sdk: '>=2.17.1 <3.0.0'
 
 dependencies:
-  http_parser: ^4.0.1
-  mime: ^1.0.2
-  path: ^1.8.2
+  http_parser: ">=4.0.0 <5.0.0"
+  mime: ">=1.0.2 <2.0.0"
+  path: ">=1.8.2 <2.0.0"
   shelf: ">=1.3.1 <2.0.0"
   yaml: ">=3.1.1 <4.0.0"

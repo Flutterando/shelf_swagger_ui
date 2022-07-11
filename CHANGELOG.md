@@ -1,4 +1,4 @@
-## 1.0.0 (2022/07/10)
+## 1.0.0+1 (2022/07/10)
 
 - Added Dart Doc
 - Added propertie: syntaxHighlightTheme, persistAuthorization, docExpansion.
