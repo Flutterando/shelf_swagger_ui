@@ -4,6 +4,8 @@ library shelf_swagger_ui;
 import 'dart:async';
 import 'dart:io';
 
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 import 'package:path/path.dart';
 import 'package:shelf/shelf.dart';
 
@@ -102,7 +104,12 @@ class SwaggerUI {
     if (path.contains('yaml') || path.contains('json')) {
       var filePath = _resolveFilePath(dirParent, path);
       final file = File(filePath);
-      return Response.ok(file.readAsBytesSync());
+      final contentType = MimeTypeResolver().lookup(file.path);
+      return Response.ok(file.readAsBytesSync(), headers: {
+        HttpHeaders.lastModifiedHeader: formatHttpDate(file.statSync().modified),
+        HttpHeaders.acceptRangesHeader: 'bytes',
+        if (contentType != null) HttpHeaders.contentTypeHeader: contentType,
+      });
     }
     return Response.ok(headers: {
       HttpHeaders.contentTypeHeader: ContentType('text', 'html', charset: 'utf-8').toString(),

@@ -1,5 +1,7 @@
 # Shelf SwaggerUI
 Present, clean and professional documentation with Swagger + shelf;
+![alt text](https://raw.githubusercontent.com/Flutterando/shelf_swagger_ui/main/example.png)
+
 
 ## Example
 
