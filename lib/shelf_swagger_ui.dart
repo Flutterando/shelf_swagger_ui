@@ -4,9 +4,6 @@ library shelf_swagger_ui;
 import 'dart:async';
 import 'dart:io';
 
-import 'package:http_parser/http_parser.dart';
-import 'package:mime/mime.dart';
-import 'package:path/path.dart';
 import 'package:shelf/shelf.dart';
 
 /// Controls the default expansion setting for the operations and tags.
@@ -34,6 +31,12 @@ enum SyntaxHighlightTheme {
   const SyntaxHighlightTheme(this.theme);
 }
 
+/// Type of schema (YAML/JSON).
+enum SpecType {
+  yaml,
+  json,
+}
+
 ///This class starts all the default attributes to start swagger-ui.
 ///In addition to receiving the Spec (YAML/JSON)
 ///it is also possible to configure the title and enable "deepLink".
@@ -47,9 +50,9 @@ enum SyntaxHighlightTheme {
 /// <br /><br />
 /// Example:
 ///```dart
-///final swaggerHandler = SwaggerUI(
-///  'swagger/swagger.yaml',
-///  title: 'Ship API',
+///final swaggerHandler = SwaggerUI.fromFile(
+///  File('swagger/swagger.yaml'),
+///  title: 'Swagger API',
 ///  deepLink: true,
 ///);
 ///
@@ -57,8 +60,8 @@ enum SyntaxHighlightTheme {
 ///```
 
 class SwaggerUI {
-  ///Schema path (YAML/JSON).
-  final String fileSchemaPath;
+  ///Schema text (YAML/JSON).
+  final String schemaText;
 
   ///Defines the title that is visible in the browser tab.
   final String title;
@@ -75,42 +78,39 @@ class SwaggerUI {
   /// If set to true, it persists authorization data and it would not be lost on browser close/refresh
   final bool persistAuthorization;
 
+  ///Type Schema (YAML/JSON).
+  final SpecType specType;
+
   SwaggerUI(
-    this.fileSchemaPath, {
-    this.title = 'Shelf Swagger',
+    this.schemaText, {
+    this.specType = SpecType.json,
+    this.title = 'API Swagger',
     this.docExpansion = DocExpansion.list,
     this.syntaxHighlightTheme = SyntaxHighlightTheme.agate,
     this.deepLink = false,
     this.persistAuthorization = false,
   });
 
-  ///Shelf Handler
-  ///```dart
-  ///final swaggerHandler = SwaggerUI(
-  ///  'swagger/swagger.yaml',
-  ///  title: 'Ship API',
-  ///  deepLink: true,
-  ///);
-  ///
-  ///var server = await io.serve(swaggerHandler, '0.0.0.0', 4000);
-  ///```
-  FutureOr<Response> call(Request request) {
-    final file = File(fileSchemaPath);
-    final mainSpec = basename(file.path);
-    final dirParent = file.parent;
-    final uri = request.url;
-    final path = uri.path;
+  static SwaggerUI fromFile(
+    File fileSchema, {
+    String title = 'API Swagger',
+    DocExpansion docExpansion = DocExpansion.list,
+    SyntaxHighlightTheme syntaxHighlightTheme = SyntaxHighlightTheme.agate,
+    bool deepLink = false,
+    bool persistAuthorization = false,
+  }) {
+    return SwaggerUI(
+      fileSchema.readAsStringSync(),
+      title: title,
+      specType: fileSchema.path.endsWith('.yaml') ? SpecType.yaml : SpecType.json,
+      docExpansion: docExpansion,
+      syntaxHighlightTheme: syntaxHighlightTheme,
+      deepLink: deepLink,
+      persistAuthorization: persistAuthorization,
+    );
+  }
 
-    if (path.contains('yaml') || path.contains('json')) {
-      var filePath = _resolveFilePath(dirParent, path);
-      final file = File(filePath);
-      final contentType = MimeTypeResolver().lookup(file.path);
-      return Response.ok(file.readAsBytesSync(), headers: {
-        HttpHeaders.lastModifiedHeader: formatHttpDate(file.statSync().modified),
-        HttpHeaders.acceptRangesHeader: 'bytes',
-        if (contentType != null) HttpHeaders.contentTypeHeader: contentType,
-      });
-    }
+  FutureOr<Response> call(Request request) {
     return Response.ok(headers: {
       HttpHeaders.contentTypeHeader: ContentType('text', 'html', charset: 'utf-8').toString(),
     }, '''
@@ -132,11 +132,12 @@ class SwaggerUI {
 
 <script>
   window.onload = () => {
+  const spec = $schemaText;
     window.ui = SwaggerUIBundle({
       dom_id: '#swagger-ui',
       docExpansion: '${docExpansion.name}',
       deepLinking: $deepLink,
-      url: "$mainSpec",
+      spec: spec,
       syntaxHighlight: {
         activate: true,
         theme: '${syntaxHighlightTheme.theme}',
@@ -148,18 +149,5 @@ class SwaggerUI {
 </body>
 </html>
 ''');
-  }
-
-  String _resolveFilePath(Directory dir, String path) {
-    final subs = dir.listSync(recursive: true).where((file) => file is Directory).toList();
-    for (var subDir in subs) {
-      var subDirPath = subDir.path.replaceFirst('${dir.path}${Platform.pathSeparator}', '');
-      final candidate = '${subDirPath}/${basename(path)}'.replaceAll('\\', '/');
-      if (path.endsWith(candidate)) {
-        return '${dir.path}/$candidate'.replaceAll('\\', '/');
-      }
-    }
-
-    return '${dir.path}/${basename(path)}';
   }
 }
