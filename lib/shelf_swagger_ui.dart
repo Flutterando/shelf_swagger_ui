@@ -102,7 +102,8 @@ class SwaggerUI {
     return SwaggerUI(
       fileSchema.readAsStringSync(),
       title: title,
-      specType: fileSchema.path.endsWith('.yaml') ? SpecType.yaml : SpecType.json,
+      specType:
+          fileSchema.path.endsWith('.yaml') ? SpecType.yaml : SpecType.json,
       docExpansion: docExpansion,
       syntaxHighlightTheme: syntaxHighlightTheme,
       deepLink: deepLink,
@@ -111,8 +112,15 @@ class SwaggerUI {
   }
 
   FutureOr<Response> call(Request request) {
+    var spec = '';
+    if (specType == SpecType.yaml) {
+      spec = "const spec = jsyaml.load(`$schemaText`);";
+    } else {
+      spec = "const spec = $schemaText;";
+    }
     return Response.ok(headers: {
-      HttpHeaders.contentTypeHeader: ContentType('text', 'html', charset: 'utf-8').toString(),
+      HttpHeaders.contentTypeHeader:
+          ContentType('text', 'html', charset: 'utf-8').toString(),
     }, '''
 <!DOCTYPE html>
 <html lang="en">
@@ -128,11 +136,12 @@ class SwaggerUI {
 </head>
 <body>
 <div id="swagger-ui"></div>
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
 <script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-bundle.js" crossorigin></script>
 
 <script>
   window.onload = () => {
-  const spec = $schemaText;
+  $spec
     window.ui = SwaggerUIBundle({
       dom_id: '#swagger-ui',
       docExpansion: '${docExpansion.name}',
